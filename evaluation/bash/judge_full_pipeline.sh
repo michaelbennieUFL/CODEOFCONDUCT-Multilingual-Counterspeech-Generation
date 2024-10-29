@@ -8,6 +8,13 @@ corpus=ML_MTCONAN_KN
 
 directory_path="./generated/"
 save_path="./evaluation/judgements/"
+
+# Check if old folder exists in save_path, create if it doesn't
+mkdir -p $save_path/old
+
+# Move existing items to old folder instead of deleting
+mv $save_path/* $save_path/old/
+
 mkdir $save_path/formated_data
 
 export SAVE_FOLDER=${save_path}
