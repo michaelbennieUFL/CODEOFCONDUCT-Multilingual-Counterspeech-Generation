@@ -13,3 +13,4 @@ tiktoken
 blobfile
 transformers
 sentencepiece
+bitsandbytes
