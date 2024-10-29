@@ -4,8 +4,6 @@ rouge_score
 numpy
 pandas
 evaluate
-json
 plotly
-os
 tqdm
-itertools
+shortuuid
