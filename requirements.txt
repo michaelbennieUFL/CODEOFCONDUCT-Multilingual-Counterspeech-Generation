@@ -7,3 +7,9 @@ evaluate
 plotly
 tqdm
 shortuuid
+accelerate
+protobuf
+tiktoken
+blobfile
+transformers
+sentencepiece
