@@ -208,9 +208,10 @@ def load_model(
                 str(math.floor(psutil.virtual_memory().available / 2**20)) + "Mib"
             )
         kwargs["quantization_config"] = BitsAndBytesConfig(
-            load_in_8bit_fp32_cpu_offload=cpu_offloading
+            load_in_8bit=True,
+            load_in_8bit_fp32_cpu_offload=True,
+            bnb_4bit_compute_dtype=torch.float16  # Set to torch.float16 for faster inference
         )
-        kwargs["load_in_8bit"] = load_8bit
     elif load_8bit:
         if num_gpus != 1:
             warnings.warn(
