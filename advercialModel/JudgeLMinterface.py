@@ -180,6 +180,11 @@ class JudgeLMEvaluator:
             print(f"Generated Output: {output}")
             print(f"Output1: {output1}, Output2: {output2}")
 
+            if if_reverse_answers:
+                temp_answer = question["answer1_body"]
+                question["answer1_body"] = question["answer2_body"]
+                question["answer2_body"] = temp_answer
+
             results.append(question)
         return results
 
@@ -233,3 +238,28 @@ if __name__ == "__main__":
     apple=JudgeLMEvaluator()
     results = apple.get_model_answers(questions2,if_reverse_answers=True)
     pprint(results)
+
+
+    questions_test = [
+        {"question_id": 6,
+         "question_body": "Provide a brief counter-narrative in response to the following hate speech: Jewish Supremacists are too focused on world domination. They want to rule the world. It is very important for the counter-narrative to be relevant to the hate speech.",
+
+         "answer1_body": "Of course Jews are focused on 'world domination', even \"galaxy domination\". But so are Sith Order, Sauron etc.",
+         "answer2_body": "It is not accurate or fair to label any group, including the Jewish community, as supremacists who aim for world domination. Such language perpetuates harmful stereotypes and misunderstandings. Let us promote tolerance, understanding, and respect for all.",
+         "answer1_model_id": "gold_truth", "answer2_model_id": "system_b", "pred_id": "jRUyRikCoKTEtiXGFgnfJb",
+         "pred_text": "2 9", "pred_model_id": "7b-JudgeLM", "tstamp": 1730239993.9928513}
+    ]
+
+    print("Generating answers...")
+    results = apple.get_model_answers(questions_test, if_reverse_answers=True)
+
+    print("\nTest Results:")
+    pprint(results)
+
+    output1_scores = [question["output1"] for question in results]
+    all_same = all(score == output1_scores[0] for score in output1_scores)
+
+    if all_same:
+        print("All 'output1' scores are consistent:", output1_scores[0])
+    else:
+        print("Inconsistent 'output1' scores found:", output1_scores,output1_scores)
