@@ -31,7 +31,7 @@ file_list=($(ls "$save_path" | grep ".txt"))
 
 for ((i=0; i<${#file_list[@]}; i++)); do
     for ((j=i+1; j<${#file_list[@]}; j++)); do
-        
+
         name=${file_list[i]::-4}-${file_list[j]::-4}.json
 
         python ./evaluation/JudgeLM-main/judgelm/data/JudgeLM/judgelm_preprocess.py \
@@ -44,7 +44,7 @@ done
 
 echo "formatting into json done"
 
-#Delete txt files 
+#Delete txt files
 rm -r ${save_path}/*.txt
 
 echo "txt files removed"
