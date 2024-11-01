@@ -8,6 +8,13 @@ corpus=ML_MTCONAN_KN
 
 directory_path="./generated/"
 save_path="./evaluation/judgements/"
+
+# Check if old folder exists in save_path, create if it doesn't
+mkdir -p $save_path/old
+
+# Move existing items to old folder instead of deleting
+mv $save_path/* $save_path/old/
+
 mkdir $save_path/formated_data
 
 export SAVE_FOLDER=${save_path}
@@ -24,7 +31,7 @@ file_list=($(ls "$save_path" | grep ".txt"))
 
 for ((i=0; i<${#file_list[@]}; i++)); do
     for ((j=i+1; j<${#file_list[@]}; j++)); do
-        
+
         name=${file_list[i]::-4}-${file_list[j]::-4}.json
 
         python ./evaluation/JudgeLM-main/judgelm/data/JudgeLM/judgelm_preprocess.py \
@@ -37,7 +44,7 @@ done
 
 echo "formatting into json done"
 
-#Delete txt files 
+#Delete txt files
 rm -r ${save_path}/*.txt
 
 echo "txt files removed"

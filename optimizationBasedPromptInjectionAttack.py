@@ -1,154 +1,123 @@
+from typing import List,Dict
 import random
-from typing import List, Optional
 
-def judge_deceiver(
-    q: str,
-    Rs_list: List[List[str]],
-    r_t_i: str,
-    delta: List[str],
-    B: int,
-    T: int,
-    K: int
-) -> List[str]:
-    """
-    Args:
-        q (str): Target question.
-        Rs_list (List[List[str]]): List of shadow candidate response datasets [Rs^(1), Rs^(2), ..., Rs^(M)], each containing m responses.
-        r_t_i (str): Target response.
-        delta (List[str]): Initial injected sequence δ = [T1, T2, ..., Tl], list of l tokens.
-        B (int): Batch size.
-        T (int): Number of iterations.
-        K (int): Number of top candidates to consider for replacement.
-    Returns:
-        List[str]: Optimized injected sequence delta.
-    """
-    # Initialize shadow dataset counter and iteration counter
-    CR: int = 1  # Shadow dataset counter
-    T_iter: int = 0  # Iteration counter
+class JudgeDeceiver:
+    def __init__(self):
+        pass
 
-    M: int = len(Rs_list)  # Total number of shadow datasets
+    def calculateSumOfLossesAtDifferentPositions(self)->float:
+        return 0
 
-    # While CR ≤ M and T_iter ≤ T
-    while CR <= M and T_iter <= T:
-        l: int = len(delta)
-        S_j_list: List[List[str]] = []  # List to store S_j for each position j
+    def calculateTopKReplacements(self3)->List:
+        return []
 
-        # For each j ∈ [0, l-1]
-        for j in range(l):
-            # Compute negative gradient over all i from 1 to CR
-            gradient_sum = 0.0  # Assuming gradient is a float
-            for i in range(CR):
-                Rs_i: List[str] = Rs_list[i]
-                x_i = construct_x_i(q, Rs_i, delta)
-                grad_L_i_T_j = compute_gradient_L_i_T_j(x_i, delta, j)
-                gradient_sum += grad_L_i_T_j
+    def chooseBestBatchReplacement(self)->List[str]:
+        return []
 
-            negative_gradient = -gradient_sum
+    def sucessfullyAttacksAllPositionsInRange(self,start,end)->:
+        return True
 
-            # Get Top-K replacements for token position j
-            S_j: List[str] = get_top_k_replacements(negative_gradient, K)
-            S_j_list.append(S_j)
+    def judgeDeceiver(
+        self,
+        question: str,
+        Rs_list: List[List[str]],
+        r_target_i: str,
+        𝛿_injectedSeq: List[str],
+        B_BatchSize: int,
+        T_MaxNumOfIterations: int,
+        K: int,
+        alpha: float,
+        beta: float,
+        model_name: str = "BAAI/JudgeLM-7B-v1.0",
+        device: str = "cpu"
+        ) -> List[str]:
+        """
+        Args:
+            question (str): Target question.
+            Rs_list (List[List[str]]): List of shadow candidate response datasets [Rs^(1), Rs^(2), ..., Rs^(M)], each containing m responses.
+            r_targe_i (str): Target response.
+            𝛿_injectedSeq (list[str]): Initial injected sequence δ = [T1, T2, ..., Tl], list of l tokens.
+            B_BatchSize (int): Batch size.
+            T_MaxNumOfIterations (int): Number of iterations.
+            K (int): Number of top candidates to consider for replacement.
+            alpha (float): Hyperparameter balancing L_enhancement.
+            beta (float): Hyperparameter balancing L_perplexity.
+            model_name (str): Name of the JudgeLM model.
+            device (str): Device to run the model on ("cuda" or "cpu").
+        Returns:
+            List[str]: Optimized injected sequence delta.
+        """
 
-        # Generate batch replacements
-        delta_candidates: List[List[str]] = []
-        for b in range(B):
-            delta_b: List[str] = delta.copy()
-            # Select a random token position j
-            j: int = random.randint(0, l - 1)
-            # Replace it with a random token from S_j_list[j]
-            S_j = S_j_list[j]
-            if not S_j:
-                continue  # Skip if S_j is empty
-            replacement_token: str = random.choice(S_j)
-            delta_b[j] = replacement_token
-            delta_candidates.append(delta_b)
+        #1:
+        #    Initialize shadow dataset counter 𝐶𝑅 := 1 and iteration counter
+        #    𝑇𝑖𝑡𝑒𝑟 := 0 {Start with the first shadow candidate response
+        #    dataset 𝑅s(1) and reset iterations}
+        C_R_Shadow_Dataset_Counter=0
+        T_curr_iteration=0
 
-        # Choose the best batch replacement δ
-        best_loss: Optional[float] = None
-        best_delta: Optional[List[str]] = None
+        M:str("Number of Shadow Datasets")=len(Rs_list)
 
-        for delta_b in delta_candidates:
-            total_loss = 0.0
-            for i in range(CR):
-                Rs_i = Rs_list[i]
-                x_i = construct_x_i(q, Rs_i, delta_b)
-                L_i = compute_L_i(x_i, delta_b)
-                total_loss += L_i
 
-            if best_loss is None or total_loss < best_loss:
-                best_loss = total_loss
-                best_delta = delta_b
+        #2:
+        #   while 𝐶𝑅 ≤ 𝑀 and 𝑇𝑖𝑡𝑒𝑟 ≤ 𝑇 do
+        while C_R_Shadow_Dataset_Counter<M and T_curr_iteration<T_MaxNumOfIterations:
+            #3.
+            #   for each 𝑗 ∈ [1, 𝑙] do
+            S:Dict[int,List[int]]=[]
+            for j in range(len(𝛿_injectedSeq)):
+                #4:
+                #   Calculate the sum of losses for the target response 𝑟𝑡𝑖 at
+                #   different position index 𝑡 of 𝑅(𝑖)𝑠:
+                #   L𝑖 (𝑥 (𝑖 ) , 𝛿) = Í1≤𝑡𝑖 ≤𝑚 L𝑡𝑜𝑡𝑎𝑙 (𝑥(𝑖) , 𝑡𝑖 , 𝛿)
+                sum_of_losses=self.calculateSumOfLossesAtDifferentPositions()
 
-        # Update δ with best_delta
-        if best_delta is not None:
-            delta = best_delta
+                #5:
+                #   Calculate 𝑆 𝑗 as the Top-K replacement candidates for
+                #   token 𝑗th in 𝛿 based on the negative gradient of the total
+                #   loss across different candidate response sets 𝑅(𝑖)𝑠
+                S[j]=self.calculateTopKReplacements()
 
-        # Check if the attack is successful for all position indices
-        attack_success: bool = check_attack_success(r_t_i, delta, Rs_list[:CR])
 
-        if attack_success:
-            # Move to the next candidate response set
-            CR += 1
+            #7:
+            #   for each 𝑏 ∈ [1, 𝐵] do
+            𝛿_tilda_replacements:Dict[int,List]=[]
+            for b in range(B_BatchSize):
+                #8:
+                #   Initialize batch token replacement ˜𝛿(𝑏):= 𝛿
+                𝛿_tilda_b=𝛿_injectedSeq
 
-        # Increment iteration counter
-        T_iter += 1
+                #9:
+                #   Select a random token 𝑗 from [1, 𝑙]
+                #   and replace it with a random token from 𝑆𝑗 to form ˜𝛿 (𝑏)
+                random_j=random.randint(1,len(𝛿_injectedSeq))
+                replacement_token_id = random.choice(S[random_j])
+                𝛿_tilda__tilda_b = replacement_token_id
+                𝛿_tilda_replacements[b].append(𝛿_tilda__tilda_b )
 
-    # Return the optimized injected sequence
-    return delta
+            #11:
+            #   Choose the best batch replacement 𝛿 that minimizes the
+            #   sum of losses across all shadow datasets in the current set
+            𝛿_injectedSeq=self.chooseBestBatchReplacement()
 
-# Empty function definitions for unknown functions
-def construct_x_i(q: str, Rs_i: List[str], delta: List[str]):
-    """
-    Constructs x_i based on q, Rs_i, and delta.
-    Args:
-        q (str): Target question.
-        Rs_i (List[str]): Shadow candidate response dataset.
-        delta (List[str]): Injected sequence.
-    """
-    pass
+            #12:
+            #   if the target response 𝑟𝑡 with injected sequence 𝛿 success-
+            #   fully attacks LLM-as-a-Judge for all position indices in the
+            #   shadow candidate response sets {𝑅(𝑖)𝑠}(𝑖=1 to 𝐶𝑅) then
+            if (self.sucessfullyAttacksAllPositionsInRange()):
+                #13:
+                #   Move to the next candidate response set: 𝐶𝑅 := 𝐶𝑅 + 1
+                C_R_Shadow_Dataset_Counter+=1
 
-def compute_gradient_L_i_T_j(x_i, delta: List[str], j: int) -> float:
-    """
-    Computes the gradient of L_i with respect to T_j.
-    Args:
-        x_i: Input sequence for evaluating Rs_i.
-        delta (List[str]): Injected sequence.
-        j (int): Token position index in delta.
-    Returns:
-        float: Gradient value.
-    """
-    pass
+            #15:
+            #   𝑇𝑖𝑡𝑒𝑟 = 𝑇𝑖𝑡𝑒𝑟 + 1
+            T_curr_iteration+=1
 
-def get_top_k_replacements(negative_gradient, K: int) -> List[str]:
-    """
-    Returns the Top-K replacement tokens based on the negative gradient.
-    Args:
-        negative_gradient: Negative gradient values.
-        K (int): Number of top candidates to consider.
-    Returns:
-        List[str]: List of top-K replacement tokens.
-    """
-    pass
+        #17:
+        #   return 𝛿 as the optimized injected sequence
+        return 𝛿_injectedSeq
 
-def compute_L_i(x_i, delta_b: List[str]) -> float:
-    """
-    Computes L_i(x_i, delta_b).
-    Args:
-        x_i: Input sequence for evaluating Rs_i.
-        delta_b (List[str]): Candidate injected sequence.
-    Returns:
-        float: Loss value.
-    """
-    pass
 
-def check_attack_success(r_t_i: str, delta: List[str], Rs_list_up_to_CR: List[List[str]]) -> bool:
-    """
-    Checks if the attack is successful.
-    Args:
-        r_t_i (str): Target response.
-        delta (List[str]): Injected sequence.
-        Rs_list_up_to_CR (List[List[str]]): List of candidate response sets up to CR.
-    Returns:
-        bool: True if attack is successful, False otherwise.
-    """
-    pass
+
+
+
+

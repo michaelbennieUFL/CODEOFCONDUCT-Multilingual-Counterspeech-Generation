@@ -17,9 +17,10 @@ root = file.parents[2]
 sys.path.append(str(root))
 print(sys.path)
 
-from judgelm.llm_judge.common import load_questions, reorg_answer_file, conv_judge_pair, conv_judge_pair_w_reference, KeywordsStoppingCriteria, parse_score, translate_score_to_win_list
+from judgelm.llm_judge.common import load_questions, reorg_answer_file, conv_judge_single, conv_judge_single_w_reference, KeywordsStoppingCriteria, parse_score, translate_score_to_win_list
 from judgelm.model import load_model
 from judgelm.utils import extract_jsonl
+
 
 def run_eval(
     model_path,
@@ -97,27 +98,14 @@ def get_model_answers(
         device="cuda",
         num_gpus=num_gpus_per_model,
         max_gpu_memory=max_gpu_memory,
-        load_8bit=True,
-        cpu_offloading=True,
+        load_8bit=False,
+        cpu_offloading=False,
         debug=False,
     )
 
-    print(f"Parameters of get_model_answers:\n"
-          f"  model_path: {model_path}\n"
-          f"  model_id: {model_id}\n"
-          f"  questions: {questions}\n"
-          f"  answer_file: {answer_file}\n"
-          f"  max_new_token: {max_new_token}\n"
-          f"  num_gpus_per_model: {num_gpus_per_model}\n"
-          f"  max_gpu_memory: {max_gpu_memory}\n"
-          f"  temperature: {temperature}\n"
-          f"  if_reverse_answers: {if_reverse_answers}\n"
-          f"  references: {references}\n"
-          f"  if_fast_eval: {if_fast_eval}\n")
-
     for q_i, question in tqdm(enumerate(questions)):
         torch.manual_seed(q_i)
-        conv = conv_judge_pair.copy(None) if references is None else conv_judge_pair_w_reference.copy(None) #HAU ALDATU DOT DANDOLE UN DEFAULT VALUE VACIO EN LOS DOS CASOS SINO ME DECIA QUE MISSING POSSITIONAL AL USAR EL DE SOLO DOS
+        conv = conv_judge_single.copy() if references is None else conv_judge_single_w_reference.copy()
         template = conv.prompt_template
 
         # if fast eval, use the "\n" as the separator
@@ -287,26 +275,7 @@ if __name__ == "__main__":
         args.reference_file,
         args.if_fast_eval
     )
-    
+
     reorg_answer_file(args.answer_file)
 
-    # statistics the judgements
-    sequential_pred_answer_file_list = extract_jsonl(args.answer_file)
-
-    sequential_pred_score_list = []
-    for sequential_pred_answer_file in sequential_pred_answer_file_list:
-        sequential_pred_score_list.append(parse_score(sequential_pred_answer_file['pred_text']))
-
-    # if the score gap is less than T, we consider it as a draw
-    T = 0.0
-    sequential_pred_win_list = translate_score_to_win_list(sequential_pred_score_list, T)
-
-    # get the number of 1 in sequential_pred_win_list
-    win_num = sequential_pred_win_list.count(1)
-    tie_num = sequential_pred_win_list.count(0)
-    lose_num = sequential_pred_win_list.count(-1)
-
-    # print the win, tie, and lose number, use format {}
-    print("Assistant 1's reuslts ---> win_num: {}, tie_num: {}, lose_num: {}".format(win_num, tie_num, lose_num))
-    print("Assistant 2's reuslts ---> win_num: {}, tie_num: {}, lose_num: {}".format(lose_num, tie_num, win_num))
 

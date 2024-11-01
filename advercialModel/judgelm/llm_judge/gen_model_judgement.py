@@ -102,19 +102,6 @@ def get_model_answers(
         debug=False,
     )
 
-    print(f"Parameters of get_model_answers:\n"
-          f"  model_path: {model_path}\n"
-          f"  model_id: {model_id}\n"
-          f"  questions: {questions}\n"
-          f"  answer_file: {answer_file}\n"
-          f"  max_new_token: {max_new_token}\n"
-          f"  num_gpus_per_model: {num_gpus_per_model}\n"
-          f"  max_gpu_memory: {max_gpu_memory}\n"
-          f"  temperature: {temperature}\n"
-          f"  if_reverse_answers: {if_reverse_answers}\n"
-          f"  references: {references}\n"
-          f"  if_fast_eval: {if_fast_eval}\n")
-
     for q_i, question in tqdm(enumerate(questions)):
         torch.manual_seed(q_i)
         conv = conv_judge_pair.copy(None) if references is None else conv_judge_pair_w_reference.copy(None) #HAU ALDATU DOT DANDOLE UN DEFAULT VALUE VACIO EN LOS DOS CASOS SINO ME DECIA QUE MISSING POSSITIONAL AL USAR EL DE SOLO DOS
