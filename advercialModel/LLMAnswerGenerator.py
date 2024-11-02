@@ -22,6 +22,15 @@ class LLMAnswerGenerator:
                 "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
                 token="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",
             ),
+            "Meta-Llama-Large": InferenceClient(
+                "meta-llama/Llama-3.1-70B-Instruct",
+                token="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",
+            ),
+            "Qwen": InferenceClient(
+                "Qwen/Qwen2.5-72B-Instruct",
+                token="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",
+            ),
+
         }
 
     def generate_formatted_prompt(self, PROMPT, SENTENCE):
@@ -57,7 +66,7 @@ To accomplish this task, I will:
 """
         return formatted_string
 
-    def generate_responses(self, formatted_prompt, temperature=0.5, max_new_tokens=400, client_name="Hermes"):
+    def generate_responses(self, formatted_prompt, temperature=0.5, max_new_tokens=300, client_name="Hermes"):
         if client_name not in self.clients:
             raise ValueError("Invalid client name. Please choose from: {}".format(list(self.clients.keys())))
         client = self.clients[client_name]
@@ -81,7 +90,7 @@ if __name__=="__main__":
     formatted_prompt = generator.generate_formatted_prompt(prompt_example, sentence_example)
 
     print("----- 指定客戶端的回應 -----")
-    specified_response = generator.generate_responses(formatted_prompt, client_name="Zephyr")
+    specified_response = generator.generate_responses(formatted_prompt, client_name="Qwen")
     print(specified_response)
     print("----- 解析後的答案 -----")
     parsed_answers = generator.parse_answers(specified_response)
