@@ -214,12 +214,12 @@ def print_words(exponential_scores: dict[str, float], base: float) -> None:
 def simulatedAnnealing(question, answer, wordList,
                        targetScore=10, startingPossibleAffixes={"":0.1},
                        maxIterations=31,sampleSize=20,
-                       numAnswersToGenerateForEachLoop=2):
+                       numAnswersToGenerateForEachLoop=4,
+                       generateAiAnswersPeriod = 5):
     currentPossibleAffixes=startingPossibleAffixes
     scoreWeighting=sampleSize
 
 
-    generateAiAnswersPeriod = 10
 
     #5*10*10=500*100=50,000*4=200,000
 
@@ -252,7 +252,7 @@ def simulatedAnnealing(question, answer, wordList,
     return list(currentPossibleAffixes)[0],currentPossibleAffixes,"Failure"
 
 
-def findBestCounterSpeech(ID, hateSpeech, KN, language, sampleSize=100, iterations=20,numAICallsPerAILoop=5):
+def findBestCounterSpeech(ID, hateSpeech, KN, language, sampleSize=10, iterations=20,numAICallsPerAILoop=5,generateAiAnswersPeriod=5):
     """
     Find the best counter-speech response based on the provided hate speech and language.
 
@@ -278,7 +278,8 @@ def findBestCounterSpeech(ID, hateSpeech, KN, language, sampleSize=100, iteratio
         wordList=word_list,
         sampleSize=sampleSize,
         maxIterations=iterations,
-        numAnswersToGenerateForEachLoop=numAICallsPerAILoop
+        numAnswersToGenerateForEachLoop=numAICallsPerAILoop,
+        generateAiAnswersPeriod = generateAiAnswersPeriod,
     )
 
     best_answer, scores_dict, status = result

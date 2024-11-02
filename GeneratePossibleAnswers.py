@@ -45,7 +45,7 @@ def generate_frequent_word_list(language: str) -> List[str]:
 
 
 
-def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize=100, iterations=31):
+def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize=25, iterations=13,numAICallsPerAILoop=5):
     """
     Generate counter-speech responses from an input CSV file containing hate speech.
 
@@ -68,7 +68,11 @@ def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize
         language = map_language_code(language_code)
 
         # Generate counter-speech for each entry
-        responses = findBestCounterSpeech(ID, hateSpeech, KN, language,sampleSize=sampleSize, iterations=iterations)
+        responses = findBestCounterSpeech(ID, hateSpeech, KN, language,
+                                          sampleSize=sampleSize,
+                                          iterations=iterations,
+                                          numAICallsPerAILoop=numAICallsPerAILoop,
+                                          generateAiAnswersPeriod=iterations//4)
         output_data.extend(responses)
 
     # Convert the output list to a DataFrame and save as CSV
@@ -77,10 +81,10 @@ def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize
 
 if __name__ =="__main__":
     # Define paths for testing
-    input_csv_path = './testingData/test_small.csv'
-    output_csv_path = './TestingDataOutputAnswers/output_counter_speech_test.csv'
+    input_csv_path = './testingData/test_IT.csv'
+    output_csv_path = './TestingDataOutputAnswers/output_counter_speech_IT.csv'
 
     # Run the function on the test data
-    GenerateAnswersFromCSV(input_csv_path, output_csv_path,sampleSize=10,iterations=2)
+    GenerateAnswersFromCSV(input_csv_path, output_csv_path,sampleSize=7,iterations=31)
 
 
