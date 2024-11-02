@@ -13,7 +13,7 @@ from typing import AsyncGenerator, Generator
 import warnings
 import requests
 
-from judgelm.constants import LOGDIR
+from advercialModel.judgelm.constants import LOGDIR
 
 
 handler = None
