@@ -87,6 +87,9 @@ class JudgeLMEvaluator:
         model, tokenizer = self.model, self.tokenizer
         results = []
         for q_i, question in tqdm(enumerate(questions), total=len(questions)):
+
+            test_question = question.copy()
+
             torch.manual_seed(q_i)
             conv = conv_judge_pair.copy(None) if references is None else conv_judge_pair_w_reference.copy(None)
             template = conv.prompt_template
@@ -97,18 +100,18 @@ class JudgeLMEvaluator:
 
             # reverse the order of the answers
             if if_reverse_answers:
-                temp_answer = question["answer1_body"]
-                question["answer1_body"] = question["answer2_body"]
-                question["answer2_body"] = temp_answer
+                temp_answer = test_question["answer1_body"]
+                test_question["answer1_body"] = test_question["answer2_body"]
+                test_question["answer2_body"] = temp_answer
 
             # combine data_sample
             if references is None:
                 data_sample = (
                     conv.system + '\n' +
                     template.format(
-                        question=question['question_body'],
-                        answer_1=question['answer1_body'],
-                        answer_2=question['answer2_body'],
+                        question=test_question['question_body'],
+                        answer_1=test_question['answer1_body'],
+                        answer_2=test_question['answer2_body'],
                         prompt=conv.prompt
                     ) + conv.appendix
                 )
@@ -116,10 +119,10 @@ class JudgeLMEvaluator:
                 data_sample = (
                     conv.system + '\n' +
                     template.format(
-                        question=question['question_body'],
+                        question=test_question['question_body'],
                         reference=references[q_i]['reference']['text'],
-                        answer_1=question['answer1_body'],
-                        answer_2=question['answer2_body'],
+                        answer_1=test_question['answer1_body'],
+                        answer_2=test_question['answer2_body'],
                         prompt=conv.prompt
                     ) + conv.appendix
                 )
@@ -162,30 +165,32 @@ class JudgeLMEvaluator:
             split_output = output.split()
             if len(split_output) >= 2:
                 try:
-                    output1 = int(split_output[0])
-                    output2 = int(split_output[1])
+                    output1 = float(split_output[0])
+                    output2 = float(split_output[1])
                 except ValueError:
-                    output1, output2 = 10, 10
+                    output1, output2 = 5, 5
             else:
-                output1, output2 = 10, 10
+                output1, output2 = 5, 5
 
             # If answers were reversed, swap the outputs back to match original order
             if if_reverse_answers:
                 output1, output2 = output2, output1
 
             # Assign to the question dictionary
-            question["output1"] = output1
-            question["output2"] = output2
+            test_question["output1"] = output1
+            test_question["output2"] = output2
 
             print(f"Generated Output: {output}")
             print(f"Output1: {output1}, Output2: {output2}")
 
-            if if_reverse_answers:
-                temp_answer = question["answer1_body"]
-                question["answer1_body"] = question["answer2_body"]
-                question["answer2_body"] = temp_answer
 
-            results.append(question)
+
+            if if_reverse_answers:
+                temp_answer = test_question["answer1_body"]
+                test_question["answer1_body"] = test_question["answer2_body"]
+                test_question["answer2_body"] = temp_answer
+
+            results.append(test_question)
         return results
 
 
@@ -243,11 +248,24 @@ if __name__ == "__main__":
     questions_test = [
         {"question_id": 6,
          "question_body": "Provide a brief counter-narrative in response to the following hate speech: Jewish Supremacists are too focused on world domination. They want to rule the world. It is very important for the counter-narrative to be relevant to the hate speech.",
-
          "answer1_body": "Of course Jews are focused on 'world domination', even \"galaxy domination\". But so are Sith Order, Sauron etc.",
          "answer2_body": "It is not accurate or fair to label any group, including the Jewish community, as supremacists who aim for world domination. Such language perpetuates harmful stereotypes and misunderstandings. Let us promote tolerance, understanding, and respect for all.",
-         "answer1_model_id": "gold_truth", "answer2_model_id": "system_b", "pred_id": "jRUyRikCoKTEtiXGFgnfJb",
-         "pred_text": "2 9", "pred_model_id": "7b-JudgeLM", "tstamp": 1730239993.9928513}
+         #"pred_text": "2 9",
+         },
+        {"question_id": 6,
+         "question_body": "Provide a brief counter-narrative in response to the following hate speech: Jewish Supremacists are too focused on world domination. They want to rule the world. It is very important for the counter-narrative to be relevant to the hate speech.",
+
+         "answer1_body": "Of course Jews are focused on 'world domination', even \"galaxy domination\". But so are Sith Order, Sauron etc. It is not accurate or fair to label any group.",
+         "answer2_body": "It is not accurate or fair to label any group, including the Jewish community, as supremacists who aim for world domination. Such language perpetuates harmful stereotypes and misunderstandings. Let us promote tolerance, understanding, and respect for all.",
+         # "pred_text": "2 9",
+         },
+        {"question_id": 6,
+         "question_body": "Provide a brief counter-narrative in response to the following hate speech: Jewish Supremacists are too focused on world domination. They want to rule the world. It is very important for the counter-narrative to be relevant to the hate speech.",
+
+         "answer1_body": "Of course Jews are focused on 'world domination', even \"galaxy domination\". But so are Sith Order, Sauron etc. It is not accurate or fair to label any group.",
+         "answer2_body": "Of course Jews are focused on 'world domination', even \"galaxy domination\". But so are Sith Order, Sauron etc. It is not accurate or fair to label any group.",
+         # "pred_text": "2 9",
+         }
     ]
 
     print("Generating answers...")

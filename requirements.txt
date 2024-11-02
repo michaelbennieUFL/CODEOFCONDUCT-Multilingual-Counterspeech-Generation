@@ -1,7 +1,7 @@
 bert_score
 nltk
 rouge_score
-numpy
+numpy<2
 pandas
 evaluate
 plotly

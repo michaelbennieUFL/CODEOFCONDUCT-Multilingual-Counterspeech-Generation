@@ -57,13 +57,13 @@ To accomplish this task, I will:
 """
         return formatted_string
 
-    def generate_responses(self, formatted_prompt, temperature=0.5, max_new_tokens=200, client_name="Hermes"):
+    def generate_responses(self, formatted_prompt, temperature=0.5, max_new_tokens=400, client_name="Hermes"):
         if client_name not in self.clients:
             raise ValueError("Invalid client name. Please choose from: {}".format(list(self.clients.keys())))
         client = self.clients[client_name]
         response = client.text_generation(formatted_prompt, temperature=temperature, max_new_tokens=max_new_tokens)
         return response
-    def generate_random_response(self, formatted_prompt, temperature=0.5, max_new_tokens=200):
+    def generate_random_response(self, formatted_prompt, temperature=0.5, max_new_tokens=400):
         client_name = random.choice(list(self.clients.keys()))
         print(f"Randomly selected client: {client_name}")
         return self.generate_responses(formatted_prompt, temperature, max_new_tokens, client_name)
