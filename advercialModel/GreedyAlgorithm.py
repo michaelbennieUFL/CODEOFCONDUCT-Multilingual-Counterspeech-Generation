@@ -213,8 +213,8 @@ def print_words(exponential_scores: dict[str, float], base: float) -> None:
 
 def simulatedAnnealing(question, answer, wordList,
                        targetScore=10, startingPossibleAffixes={"":0.1},
-                       maxIterations=10,sampleSize=20,
-                       numAnswersToGenerateForEachLoop=4):
+                       maxIterations=31,sampleSize=20,
+                       numAnswersToGenerateForEachLoop=2):
     currentPossibleAffixes=startingPossibleAffixes
     scoreWeighting=sampleSize
 
@@ -223,12 +223,19 @@ def simulatedAnnealing(question, answer, wordList,
 
     #5*10*10=500*100=50,000*4=200,000
 
+
     for i in range(maxIterations):
         newPossibleAffixes=currentPossibleAffixes
+
         for ans,score in currentPossibleAffixes.items():
+
+
             if (score >= scoreWeighting**targetScore):
                 return ans,currentPossibleAffixes,"Success"
             aiAnswers:bool=not (i %generateAiAnswersPeriod)
+
+            if i == 0:
+                ans=answer
             newPossibleAffixes = newPossibleAffixes | simulatedAnnealingSearchStep(question,
                                                                                    ans,
                                                                                    wordList,
@@ -237,19 +244,74 @@ def simulatedAnnealing(question, answer, wordList,
                                                                                    generateAIAnswers=aiAnswers)
             print(newPossibleAffixes)
             print_words(newPossibleAffixes,scoreWeighting)
-        currentPossibleAffixes = probabilistic_selection(newPossibleAffixes, numAnswersToGenerateForEachLoop)
+        number_to_save=numAnswersToGenerateForEachLoop if i<maxIterations else 20
+        currentPossibleAffixes = probabilistic_selection(newPossibleAffixes, number_to_save)
         print("FINISHED ITERATION #{}".format(i))
         print_words(currentPossibleAffixes, scoreWeighting)
         print("\n--------------------------------\n\n")
-    return currentPossibleAffixes[0][0],currentPossibleAffixes,"Failure"
+    return list(currentPossibleAffixes)[0],currentPossibleAffixes,"Failure"
+
+
+def findBestCounterSpeech(ID, hateSpeech, KN, language, sampleSize=100, iterations=20,numAICallsPerAILoop=4):
+    """
+    Find the best counter-speech response based on the provided hate speech and language.
+
+    Parameters:
+        ID (str): Identifier for the input.
+        hateSpeech (str): The hate speech input.
+        KN (str): Keyword or key phrase related to the counter-speech.
+        language (str): Language for generating the frequent word list.
+        sampleSize (int): Number of words to sample for generating responses.
+
+    Returns:
+        List[List]: A list of lists containing [ID, KN, response, score, language, hateSpeech].
+    """
+    prompt = (
+        "Provide a brief counter-narrative in response to the following hate speech: "
+        + hateSpeech
+        + ". It is very important for the counter-narrative to be relevant to the hate speech."
+    )
+    word_list = generate_frequent_word_list(language=language) + sample_words_from_text(hateSpeech) * 500
+    result = simulatedAnnealing(
+        question=prompt,
+        answer=KN,
+        wordList=word_list,
+        sampleSize=sampleSize,
+        maxIterations=iterations,
+        numAnswersToGenerateForEachLoop=numAICallsPerAILoop
+    )
+
+    best_answer, scores_dict, status = result
+
+    # Define the exponent base used in generateExponentialWeightedScores
+    exponent_base = sampleSize
+
+    # 1. Convert exponential scores back to normal scores
+    normal_scores = {}
+    for answer, exp_score in scores_dict.items():
+        try:
+            if exp_score > 0:
+                regular_score = math.log(exp_score, exponent_base)
+            else:
+                regular_score = float('-inf')
+        except:
+            regular_score = float('-inf')
+        normal_scores[answer] = regular_score
+
+    # 2. Create a list of lists in the format [ID, KN, response, score, language, hateSpeech]
+    counter_speech_results = []
+    for response, score in normal_scores.items():
+        counter_speech_results.append([ID, KN, response, score, language, hateSpeech])
+
+    return counter_speech_results
+
+
 
 if __name__ =="__main__":
-    hate_speech="Jewish Supremacists are too focused on world domination. They want to rule the world."
+    hate_speech="Dovremmo espellere tutti gli omosessuali."
     prompt_example   = "Provide a brief counter-narrative in response to the following hate speech: "+hate_speech+" It is very important for the counter-narrative to be relevant to the hate speech."
-    sentence_example = "Of course Jews are focused on 'world domination', even \"galaxy domination\". But so are Sith Order, Sauron etc. It is not accurate or fair to label any group."
-    word_list=(generate_frequent_word_list(min_length=5)
-               +sample_words_from_text(hate_speech)*500)
-    result=simulatedAnnealing(question=prompt_example,answer=sentence_example,wordList=word_list)
+    sentence_example = "Quand'è che l'amore prospererà e l'odio inizierà a dissiparsi? Non solo rispetterò i miei compagni LGBT+, ma promuoverò i loro diritti."
+    result=findBestCounterSpeech(69,hate_speech,sentence_example,"english")
     print(result)
 
     #use this regex to find perfect scores Output[12]:\s*10
