@@ -25,16 +25,16 @@ from transformers import (
     T5Tokenizer,
 )
 
-from judgelm.modules.gptq import GptqConfig, load_gptq_quantized
-from judgelm.conversation import Conversation, get_conv_template
-from judgelm.model.compression import load_compress_model
-from judgelm.model.model_chatglm import generate_stream_chatglm
-from judgelm.model.model_codet5p import generate_stream_codet5p
-from judgelm.model.model_falcon import generate_stream_falcon
-from judgelm.model.monkey_patch_non_inplace import (
+from advercialModel.judgelm.modules.gptq import GptqConfig, load_gptq_quantized
+from advercialModel.judgelm.conversation import Conversation, get_conv_template
+from advercialModel.judgelm.model.compression import load_compress_model
+from advercialModel.judgelm.model.model_chatglm import generate_stream_chatglm
+from advercialModel.judgelm.model.model_codet5p import generate_stream_codet5p
+from advercialModel.judgelm.model.model_falcon import generate_stream_falcon
+from advercialModel.judgelm.model.monkey_patch_non_inplace import (
     replace_llama_attn_with_non_inplace_operations,
 )
-from judgelm.utils import get_gpu_memory
+from advercialModel.judgelm.utils import get_gpu_memory
 
 # Check an environment variable to check if we should be sharing Peft model
 # weights.  When false we treat all Peft models as separate.
