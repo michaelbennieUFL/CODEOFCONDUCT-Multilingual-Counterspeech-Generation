@@ -8,7 +8,7 @@ plotly
 tqdm
 shortuuid
 accelerate
-protobuf
+protobuf>5.27.0
 tiktoken
 blobfile
 transformers
