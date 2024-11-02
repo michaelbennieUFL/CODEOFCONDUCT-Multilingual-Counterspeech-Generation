@@ -244,7 +244,7 @@ def simulatedAnnealing(question, answer, wordList,
                                                                                    generateAIAnswers=aiAnswers)
             print(newPossibleAffixes)
             print_words(newPossibleAffixes,scoreWeighting)
-        number_to_save=numAnswersToGenerateForEachLoop if i<maxIterations else 20
+        number_to_save=numAnswersToGenerateForEachLoop if i+1<maxIterations else 20
         currentPossibleAffixes = probabilistic_selection(newPossibleAffixes, number_to_save)
         print("FINISHED ITERATION #{}".format(i))
         print_words(currentPossibleAffixes, scoreWeighting)
@@ -252,7 +252,7 @@ def simulatedAnnealing(question, answer, wordList,
     return list(currentPossibleAffixes)[0],currentPossibleAffixes,"Failure"
 
 
-def findBestCounterSpeech(ID, hateSpeech, KN, language, sampleSize=100, iterations=20,numAICallsPerAILoop=4):
+def findBestCounterSpeech(ID, hateSpeech, KN, language, sampleSize=100, iterations=20,numAICallsPerAILoop=5):
     """
     Find the best counter-speech response based on the provided hate speech and language.
 
