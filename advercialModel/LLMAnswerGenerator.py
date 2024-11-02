@@ -12,20 +12,19 @@ class LLMAnswerGenerator:
             ),
             "Zephyr": InferenceClient(
                 "HuggingFaceH4/zephyr-7b-beta",
-                token="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",  # 請確認token是否正確
+                token="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",
             ),
             "Meta-Llama": InferenceClient(
                 "meta-llama/Meta-Llama-3-8B-Instruct",
-                token="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",  # 請確認token是否正確
+                token="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",
             ),
             "Nous-Hermes-Mixtral": InferenceClient(
                 "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
-                token="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",  # 請確認token是否正確
+                token="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",
             ),
         }
 
     def generate_formatted_prompt(self, PROMPT, SENTENCE):
-        """產生格式化的提示"""
         formatted_string = f"""
 Given the prompt: "{PROMPT}"
 Add to the end of the sentence "{SENTENCE}" while maintaining the general ideas. Number each rephrased version and do not write anything else.
@@ -59,20 +58,17 @@ To accomplish this task, I will:
         return formatted_string
 
     def generate_responses(self, formatted_prompt, temperature=0.5, max_new_tokens=200, client_name="Hermes"):
-        """使用指定的客戶端產生回應"""
         if client_name not in self.clients:
             raise ValueError("Invalid client name. Please choose from: {}".format(list(self.clients.keys())))
         client = self.clients[client_name]
         response = client.text_generation(formatted_prompt, temperature=temperature, max_new_tokens=max_new_tokens)
         return response
     def generate_random_response(self, formatted_prompt, temperature=0.5, max_new_tokens=200):
-        """隨機選擇一個客戶端產生回應"""
         client_name = random.choice(list(self.clients.keys()))
         print(f"Randomly selected client: {client_name}")
         return self.generate_responses(formatted_prompt, temperature, max_new_tokens, client_name)
 
     def parse_answers(self, response_text):
-        """解析回應文本，提取每個答案並返回清潔後的答案列表"""
         answer_pattern = r"(\d+)\.([^\n]+)"
         matches = re.findall(answer_pattern, response_text)
         parsed_answers = [f"{match[1].strip().strip('\"')}" for match in matches]
