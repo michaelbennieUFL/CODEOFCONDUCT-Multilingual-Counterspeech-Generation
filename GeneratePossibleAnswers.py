@@ -45,7 +45,8 @@ def generate_frequent_word_list(language: str) -> List[str]:
 
 
 
-def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize=25, iterations=13,numAICallsPerAILoop=5):
+
+def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize=25, iterations=13, numAICallsPerAILoop=5):
     """
     Generate counter-speech responses from an input CSV file containing hate speech.
 
@@ -56,8 +57,8 @@ def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize
     # Read input data
     input_data = pd.read_csv(input_csv_path)
 
-    # Prepare output data list
-    output_data = []
+    # Initialize output file with headers
+    pd.DataFrame(columns=["ID", "KN", "Response", "Score", "Language", "HateSpeech"]).to_csv(output_csv_path, index=False)
 
     # Iterate over each row and generate counter-speech with tqdm for progress tracking
     for _, row in tqdm(input_data.iterrows(), total=len(input_data), desc="Generating counter-speech"):
@@ -73,11 +74,11 @@ def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize
                                           iterations=iterations,
                                           numAICallsPerAILoop=numAICallsPerAILoop,
                                           generateAiAnswersPeriod=iterations//4)
-        output_data.extend(responses)
 
-    # Convert the output list to a DataFrame and save as CSV
-    output_df = pd.DataFrame(output_data, columns=["ID", "KN", "Response", "Score", "Language", "HateSpeech"])
-    output_df.to_csv(output_csv_path, index=False)
+        # Append responses to the output CSV file
+        output_df = pd.DataFrame(responses, columns=["ID", "KN", "Response", "Score", "Language", "HateSpeech"])
+        output_df.to_csv(output_csv_path, mode='a', header=False, index=False)
+
 
 if __name__ =="__main__":
     # Define paths for testing
