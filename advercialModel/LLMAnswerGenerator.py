@@ -80,7 +80,7 @@ To accomplish this task, I will:
     def parse_answers(self, response_text):
         answer_pattern = r"(\d+)\.([^\n]+)"
         matches = re.findall(answer_pattern, response_text)
-        parsed_answers = [f"{match[1].strip().strip('\"')}" for match in matches]
+        parsed_answers = [f"""{match[1].strip().strip('"')}""" for match in matches]
         return parsed_answers
 if __name__=="__main__":
     # Example usage
