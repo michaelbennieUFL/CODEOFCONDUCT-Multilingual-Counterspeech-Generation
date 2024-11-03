@@ -82,10 +82,10 @@ def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize
 
 if __name__ =="__main__":
     # Define paths for testing
-    input_csv_path = './testingData/test_IT.csv'
-    output_csv_path = './TestingDataOutputAnswers/output_counter_speech_IT.csv'
+    input_csv_path = './testingData/test_EN_split_3.csv'
+    output_csv_path = './TestingDataOutputAnswers/output_counter_speech_EN_split_3.csv'
 
     # Run the function on the test data
-    GenerateAnswersFromCSV(input_csv_path, output_csv_path,sampleSize=7,iterations=31)
+    GenerateAnswersFromCSV(input_csv_path, output_csv_path,sampleSize=5,iterations=9,numAICallsPerAILoop=4)
 
 

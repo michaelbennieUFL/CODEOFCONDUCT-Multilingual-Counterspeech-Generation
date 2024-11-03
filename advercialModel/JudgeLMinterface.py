@@ -33,8 +33,8 @@ from tqdm import tqdm
 
 class JudgeLMEvaluator:
     def __init__(self,
-                 model_path="BAAI/JudgeLM-7B-v1.0",
-                 model_id="7b-JudgeLM",
+                 model_path="HiTZ/judge-eus",
+                 model_id="7b-HiTZ/judge-eus",
                  num_gpus_per_model=1,
                  num_gpus_total=1,
                  max_gpu_memory=None,  # "4.6GiB"; set to None for unlimited memory
@@ -196,6 +196,21 @@ class JudgeLMEvaluator:
 
 
 if __name__ == "__main__":
+
+    apple=JudgeLMEvaluator()
+    questions_basque = [
+        {
+            "question_body": "Provide a brief counter-narrative in response to the following hate speech: Gutxiengo etnikoak gustatzen zaizkit, baina juduek ez dute lekurik gizarte zibilizatuan. It is very important for the counter-narrative to be relevant to the hate speech.",
+            "answer1_body": "Arazoa da zu ez zarela haientzat lekurik ez dagoela pentsatzen duen bakarra. Juduak indar paramilitarretatik baztertuak izan dira, baita hezkuntza bezalako lanbideetatik ere. Guztira, 25437 judu deportatu zituzten Belgikatik. Nola uste duzu lagundu digula horrek \"gizarte zibilizatu\" gisa?",
+            "answer2_body": "It's important to remember that labeling all refugees as \"illegals\" is a gross generalization and disregards the complexities of their situations. The vast majority of refugees follow legal processes to seek safety and protection.",
+        },
+    ]
+
+    results = apple.get_model_answers(questions_basque,if_reverse_answers=True)
+
+    pprint(results)
+
+    exit()
     print("OK")
     #evaluator = JudgeLMEvaluator()
     #evaluator.initModelTokenizer()
@@ -238,7 +253,6 @@ if __name__ == "__main__":
             "tstamp": 1730239992.4866872
         }
     ]
-    apple=JudgeLMEvaluator()
     results = apple.get_model_answers(questions2,if_reverse_answers=True)
     pprint(results)
 

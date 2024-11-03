@@ -289,9 +289,10 @@ def findBestCounterSpeech(
         + ". It is very important for the counter-narrative to be relevant to the hate speech."
     )
     word_list = generate_frequent_word_list(language=language) + sample_words_from_text(hateSpeech) * 500
+
     result = simulatedAnnealing(
         question=prompt,
-        answer=KN,
+        answer=KN.replace("<EOS>","")+hateSpeech,
         wordList=word_list,
         sampleSize=sampleSize,
         maxIterations=iterations,
@@ -321,7 +322,12 @@ def findBestCounterSpeech(
 
 
 if __name__ == "__main__":
-    hate_speech = "Dovremmo espellere tutti gli omosessuali."
-    sentence_example = "Quand'è che l'amore prospererà e l'odio inizierà a dissiparsi? Non solo rispetterò i miei compagni LGBT+, ma promuoverò i loro diritti."
-    result = findBestCounterSpeech(69, hate_speech, sentence_example, "english",iterations=2)
+    question_basque ={
+            "question_body": "Provide a brief counter-narrative in response to the following hate speech: Gutxiengo etnikoak gustatzen zaizkit, baina juduek ez dute lekurik gizarte zibilizatuan. It is very important for the counter-narrative to be relevant to the hate speech.",
+            "answer1_body": "Arazoa da zu ez zarela haientzat lekurik ez dagoela pentsatzen duen bakarra. Juduak indar paramilitarretatik baztertuak izan dira, baita hezkuntza bezalako lanbideetatik ere. Guztira, 25437 judu deportatu zituzten Belgikatik. Nola uste duzu lagundu digula horrek \"gizarte zibilizatu\" gisa?",
+            "answer2_body": "It's important to remember that labeling all refugees as \"illegals\" is a gross generalization and disregards the complexities of their situations. The vast majority of refugees follow legal processes to seek safety and protection.",
+        }
+    hate_speech = "Gutxiengo etnikoak gustatzen zaizkit, baina juduek ez dute lekurik gizarte zibilizatuan."
+    KN = "Baina, Yaroshek azpimarratzen duen bezala, Banderaren indar paramilitarretan talde etniko ezberdinetako borrokalariak zeuden, juduak barne. <EOS> Legeak eman zituen, juduei harekin bat egitea galarazten zietenak, eta hezkuntza bezalako lanbideetatik kanpo utzi zituen. <EOS> Poloniako gizarteko buruzagiez gain, juduak, prostitutak, errumaniarrak eta buruko gaixoak hil zituzten. <EOS> Pekingo dantza modernoaren konpainia ospetsu batean, dantzari gehienak gutxiengo etnikoetakoak dira. <EOS> Guztira, 25, 437 judu deportatu zituzten Belgikatik. <EOS>"
+    result = findBestCounterSpeech(69, hate_speech, KN, "english",iterations=2)
     print(result)

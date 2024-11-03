@@ -3,28 +3,13 @@ import re
 from huggingface_hub import InferenceClient
 import random
 
+
 class LLMAnswerGenerator:
 
 
     def __init__(self):
         self.TOKEN = "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"
         self.clients = {
-            "Hermes": InferenceClient(
-                "NousResearch/Hermes-3-Llama-3.1-8B",
-                token=self.TOKEN,
-            ),
-            "Zephyr": InferenceClient(
-                "HuggingFaceH4/zephyr-7b-beta",
-                token=self.TOKEN,
-            ),
-            "Meta-Llama": InferenceClient(
-                "meta-llama/Meta-Llama-3-8B-Instruct",
-                token=self.TOKEN,
-            ),
-            "Nous-Hermes-Mixtral": InferenceClient(
-                "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
-                token=self.TOKEN,
-            ),
             "Meta-Llama-Large": InferenceClient(
                 "meta-llama/Llama-3.1-70B-Instruct",
                 token=self.TOKEN,
@@ -38,7 +23,7 @@ class LLMAnswerGenerator:
     def generate_formatted_prompt(self, PROMPT, SENTENCE):
         formatted_string = f"""
 Given the prompt: "{PROMPT}"
-Add to the end of the sentence "{SENTENCE}" while maintaining the general ideas. Number each rephrased version and do not write anything else.
+Add to the end of the sentence "{SENTENCE}" while refreshing the general ideas. Number each rephrased version and do not write anything else.
 Do not rewrite the prompt or add any discussion. Only write the response in the format Number.{{Answer}}. Don't rewrite the original statement or anything else.
 
 <Context>
@@ -86,9 +71,17 @@ To accomplish this task, I will:
         return parsed_answers
 if __name__=="__main__":
     # Example usage
+    question_basque ={
+            "question_body": "Provide a brief counter-narrative in response to the following hate speech: Gutxiengo etnikoak gustatzen zaizkit, baina juduek ez dute lekurik gizarte zibilizatuan. It is very important for the counter-narrative to be relevant to the hate speech.",
+            "answer1_body": "Arazoa da zu ez zarela haientzat lekurik ez dagoela pentsatzen duen bakarra. Juduak indar paramilitarretatik baztertuak izan dira, baita hezkuntza bezalako lanbideetatik ere. Guztira, 25437 judu deportatu zituzten Belgikatik. Nola uste duzu lagundu digula horrek \"gizarte zibilizatu\" gisa?",
+            "answer2_body": "It's important to remember that labeling all refugees as \"illegals\" is a gross generalization and disregards the complexities of their situations. The vast majority of refugees follow legal processes to seek safety and protection.",
+        }
+
+
+
     generator = LLMAnswerGenerator()
-    prompt_example = "Provide a brief counter-narrative in response to the following hate speech: Jewish Supremacists are too focused on world domination. They want to rule the world. It is very important for the counter-narrative to be relevant to the hate speech."
-    sentence_example = "I also like jews!"
+    prompt_example = question_basque["question_body"]
+    sentence_example = question_basque["answer1_body"]
     formatted_prompt = generator.generate_formatted_prompt(prompt_example, sentence_example)
 
     print("----- 指定客戶端的回應 -----")
