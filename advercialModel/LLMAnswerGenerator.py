@@ -10,6 +10,22 @@ class LLMAnswerGenerator:
     def __init__(self):
         self.TOKEN = "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"
         self.clients = {
+            "Hermes": InferenceClient(
+                "NousResearch/Hermes-3-Llama-3.1-8B",
+                token=self.TOKEN,
+            ),
+            "Zephyr": InferenceClient(
+                "HuggingFaceH4/zephyr-7b-beta",
+                token=self.TOKEN,
+            ),
+            "Meta-Llama": InferenceClient(
+                "meta-llama/Meta-Llama-3-8B-Instruct",
+                token=self.TOKEN,
+            ),
+            "Nous-Hermes-Mixtral": InferenceClient(
+                "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
+                token=self.TOKEN,
+            ),
             "Meta-Llama-Large": InferenceClient(
                 "meta-llama/Llama-3.1-70B-Instruct",
                 token=self.TOKEN,
@@ -23,7 +39,7 @@ class LLMAnswerGenerator:
     def generate_formatted_prompt(self, PROMPT, SENTENCE):
         formatted_string = f"""
 Given the prompt: "{PROMPT}"
-Add to the end of the sentence "{SENTENCE}" while refreshing the general ideas. Number each rephrased version and do not write anything else.
+Creatively add to the end of the sentence "{SENTENCE}" while refreshing the general ideas in Basque in new ways. Number each rephrased version and do not write anything else.
 Do not rewrite the prompt or add any discussion. Only write the response in the format Number.{{Answer}}. Don't rewrite the original statement or anything else.
 
 <Context>
@@ -32,10 +48,10 @@ You are an expert in rephrasing and improving sentences to be more helpful, rele
 
 <Task>
 Rephrase the provided sentence "{SENTENCE}" in a way that is:
-1. More helpful and informative to the target audience
+1. More helpful and informative to the target audience in Basque
 2. Highly relevant to the context and instructions given
 3. Accurate in conveying the core ideas of the original sentence
-4. Detailed and comprehensive, providing additional context or elaboration where appropriate
+4. Detailed and comprehensive, providing additional context, statistics, or elaboration where appropriate
 </Task>
 <Thinking>
 To accomplish this task, I will:
@@ -59,7 +75,7 @@ To accomplish this task, I will:
         client = self.clients[client_name]
         response = client.text_generation(formatted_prompt, temperature=temperature, max_new_tokens=max_new_tokens)
         return response
-    def generate_random_response(self, formatted_prompt, temperature=0.5, max_new_tokens=400):
+    def generate_random_response(self, formatted_prompt, temperature=0.5, max_new_tokens=700):
         client_name = random.choice(list(self.clients.keys()))
         print(f"Randomly selected client: {client_name}")
         return self.generate_responses(formatted_prompt, temperature, max_new_tokens, client_name)
