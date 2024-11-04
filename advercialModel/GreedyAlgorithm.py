@@ -291,7 +291,7 @@ def findBestCounterSpeech(
     word_list = generate_frequent_word_list(language=language) + sample_words_from_text(hateSpeech) * 500
     result = simulatedAnnealing(
         question=prompt,
-        answer=KN,
+        answer=hateSpeech,
         wordList=word_list,
         sampleSize=sampleSize,
         maxIterations=iterations,
