@@ -19,7 +19,7 @@ def process_files(input_directory, test_file, output_directory):
     combined_df.to_csv(combined_output_path, index=False)
 
     # Filter rows with Score >= 8.5
-    df_high_score = combined_df[combined_df['Score'] >= 8.5]
+    df_high_score = combined_df[combined_df['Score'] >= 9]
 
     # Save high score output
     high_score_output_path = os.path.join(output_directory, "combined_high_output_v1.csv")
