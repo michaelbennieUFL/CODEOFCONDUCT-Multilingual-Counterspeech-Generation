@@ -18,12 +18,23 @@ def process_files(input_directory, test_file, output_directory):
     combined_output_path = os.path.join(output_directory, "combined_output.csv")
     combined_df.to_csv(combined_output_path, index=False)
 
-    # Filter rows with Score >= 8
+    # Filter rows with Score >= 8.5
     df_high_score = combined_df[combined_df['Score'] >= 8.5]
 
     # Save high score output
     high_score_output_path = os.path.join(output_directory, "combined_high_output_v1.csv")
     df_high_score.to_csv(high_score_output_path, index=False)
+
+    # Split high score output into EU and non-EU language files
+    eu_languages = ['basque',]  # Define EU language codes
+    df_eu = df_high_score[df_high_score['Language'].isin(eu_languages)]
+    df_non_eu = df_high_score[~df_high_score['Language'].isin(eu_languages)]
+
+    # Save EU and non-EU language outputs
+    eu_output_path = os.path.join(output_directory, "combined_high_output_v1_EU.csv")
+    non_eu_output_path = os.path.join(output_directory, "combined_high_output_v1_non_EU.csv")
+    df_eu.to_csv(eu_output_path, index=False)
+    df_non_eu.to_csv(non_eu_output_path, index=False)
 
     # Load test file to find missing entries
     df_test = pd.read_csv(test_file)
