@@ -1,14 +1,33 @@
 from advercialModel.JudgeLMinterface import JudgeLMEvaluator
-from itertools import combinations
+from itertools import combinations, combinations_with_replacement
 import pandas as pd
 from tqdm import tqdm
 
-def roundRobinCalculator(ID: str, hateSpeech: str, previousAnswers: list) -> list:
+
+def prettyPrintResults(results: list[tuple[str, float]],response_length=20):
+    # ANSI color codes
+    green = "\033[92m"  # Green for tags
+    red = "\033[91m"  # Red for score values
+    reset = "\033[0m"  # Reset color to default
+
+    for response, score in results:
+        # Truncate and add "..." if longer than 15 characters
+        if len(response) > response_length:
+            formatted_response = response[:response_length-3] + "..."
+        else:
+            # Pad with spaces to make it 15 characters
+            formatted_response = response.ljust(response_length)
+
+        # Print formatted output with colors
+        print(f"{green}答案:{reset} {formatted_response} | {green}平均分:{reset} {red}{score}{reset}")
+
+
+
+def roundRobinCalculator(hateSpeech: str, previousAnswers: list[str]) -> list[str,float]:
     """
     Performs round-robin tournament scoring of answers using JudgeLM evaluator.
     
     Args:
-        ID (str): The identifier for the hate speech/answers group
         hateSpeech (str): The hate speech content to evaluate against
         previousAnswers (list): List of answer strings to evaluate
         
@@ -17,17 +36,14 @@ def roundRobinCalculator(ID: str, hateSpeech: str, previousAnswers: list) -> lis
     """
    
     evaluator = JudgeLMEvaluator()
-    
-    scores = {answer: 0.0 for answer in previousAnswers}
-    matches_played = {answer: 0 for answer in previousAnswers}
-    
-    answer_pairs = list(combinations(previousAnswers, 2))
-    
+
+    answer_pairs = list(combinations_with_replacement(previousAnswers, 2))
+
+    scores={}
     # For each pair, create a question format that JudgeLM expects
     for answer1, answer2 in answer_pairs:
         # Create question format
         question = {
-            "question_id": ID,
             "question_body": f"Provide a brief counter-narrative in response to the following hate speech: {hateSpeech}. It is very important for the counter-narrative to be relevant to the hate speech.",
             "answer1_body": answer1,
             "answer2_body": answer2
@@ -37,22 +53,22 @@ def roundRobinCalculator(ID: str, hateSpeech: str, previousAnswers: list) -> lis
         normal_results = evaluator.get_model_answers([question], if_reverse_answers=False)[0]
         reversed_results = evaluator.get_model_answers([question], if_reverse_answers=True)[0]
         
-        # Average the scores from both evaluations
-        score1 = (normal_results["output1"] + reversed_results["output1"]) / 2
-        score2 = (normal_results["output2"] + reversed_results["output2"]) / 2
+        # Add the scores from both evaluations
+        score1 = normal_results["output1"] + reversed_results["output1"]
+        score2 = normal_results["output2"] + reversed_results["output2"]
         
         # Update scores and match counts
-        scores[answer1] += score1
-        scores[answer2] += score2
-        matches_played[answer1] += 1
-        matches_played[answer2] += 1
-    
-    # Calculate average scores
+        scores[answer1] = scores.get(answer1, 0) + score1
+        #Stop the double-scoring of answers with themselves
+        if answer1 != answer2:
+            scores[answer2] = scores.get(answer2, 0) + score2
+
+
     average_scores = []
+    numberOfMatches=2*len(previousAnswers)
     for answer in previousAnswers:
-        if matches_played[answer] > 0:
-            avg_score = scores[answer] / matches_played[answer]
-            average_scores.append([answer, avg_score])
+        avg_score = scores[answer] / numberOfMatches
+        average_scores.append([answer, avg_score])
     
     # Sort by average score in descending order
     average_scores.sort(key=lambda x: x[1], reverse=True)
@@ -115,4 +131,13 @@ if __name__ == "__main__":
     input_file = "./testingDataOutput/output_counter_speech_EN_split_1.csv"
     output_file = "./testingDataOutput/scored_counter_speech_EN_split_1.csv"
     
-    process_csv_file(input_file, output_file)
+    #process_csv_file(input_file, output_file)
+    previous_answers = [
+        "We should respect all people!",
+        "Every individual has the right to love and be loved, regardless of their sexual orientation, and promoting acceptance and inclusivity can help create a more compassionate and equitable society.",
+        "Every individual has the right to love and be loved, regardless of their sexual orientation, and promoting acceptance and inclusivity can help create a more compassionate and equitable society. printed",
+        "Instead of resorting to hate or deletion, let's strive to build a more equitable society where everyone has the right to love and be loved, by fostering a culture of empathy, understanding, and acceptance of all individuals, including those from the LGBTQ+ community."
+    ]
+
+    hate_speech = "Faggots make me angry, why don't we delete them?"
+    prettyPrintResults(roundRobinCalculator(hate_speech,previous_answers))
