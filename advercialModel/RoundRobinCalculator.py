@@ -191,7 +191,7 @@ def process_csv_file(input_file: str, output_file: str):
 
 if __name__ == "__main__":
     # Example usage
-    input_file = "../testResults.csv"
-    output_file = "../testResultsCompared.csv"
+    input_file = "../processedOutput/combined_high_output_v1_EN.csv"
+    output_file = "../optimizedResultsByLanguage/EN_Final_Results.csv"
 
     process_csv_file(input_file, output_file)
