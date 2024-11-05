@@ -1,4 +1,6 @@
 from itertools import combinations
+
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
@@ -150,19 +152,20 @@ def process_csv_file(input_file: str, output_file: str):
 
         # If less than 4 unique responses, duplicate the responses until we have 4
         num_responses = len(merged_df)
+        # If less than 4 unique responses, duplicate the responses until we have 4
+        num_responses = len(merged_df)
         if num_responses < 4:
-            duplicates_needed = 4 - num_responses
             if num_responses > 0:
-                duplicates_df = merged_df.iloc[:duplicates_needed].copy()
-                merged_df = pd.concat([merged_df, duplicates_df], ignore_index=True)
+                repeats_needed = int(np.ceil(4 / num_responses))
+                merged_df = pd.concat([merged_df] * repeats_needed, ignore_index=True)
+                merged_df = merged_df.iloc[:4]
             else:
                 # If there are no responses, create dummy entries
-                for _ in range(4):
-                    merged_df = merged_df.append({
-                        'Response': '',
-                        'original_score': 0,
-                        'comparative_score': 0
-                    }, ignore_index=True)
+                merged_df = pd.DataFrame({
+                    'Response': [''] * 4,
+                    'original_score': [0] * 4,
+                    'comparative_score': [0] * 4
+                })
 
         # Assign ranking from 1 to 4
         merged_df['ranking'] = range(1, 5)
