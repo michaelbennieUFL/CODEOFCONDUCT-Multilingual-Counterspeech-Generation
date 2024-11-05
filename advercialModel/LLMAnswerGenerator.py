@@ -4,33 +4,35 @@ from huggingface_hub import InferenceClient
 import random
 
 class LLMAnswerGenerator:
+
+
     def __init__(self):
+        self.TOKEN = "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"
         self.clients = {
             "Hermes": InferenceClient(
                 "NousResearch/Hermes-3-Llama-3.1-8B",
-                token="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",
+                token=self.TOKEN,
             ),
             "Zephyr": InferenceClient(
                 "HuggingFaceH4/zephyr-7b-beta",
-                token="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",
+                token=self.TOKEN,
             ),
             "Meta-Llama": InferenceClient(
                 "meta-llama/Meta-Llama-3-8B-Instruct",
-                token="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",
+                token=self.TOKEN,
             ),
             "Nous-Hermes-Mixtral": InferenceClient(
                 "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
-                token="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",
+                token=self.TOKEN,
             ),
             "Meta-Llama-Large": InferenceClient(
                 "meta-llama/Llama-3.1-70B-Instruct",
-                token="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",
+                token=self.TOKEN,
             ),
             "Qwen": InferenceClient(
                 "Qwen/Qwen2.5-72B-Instruct",
-                token="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",
+                token=self.TOKEN,
             ),
-
         }
 
     def generate_formatted_prompt(self, PROMPT, SENTENCE):
@@ -80,7 +82,7 @@ To accomplish this task, I will:
     def parse_answers(self, response_text):
         answer_pattern = r"(\d+)\.([^\n]+)"
         matches = re.findall(answer_pattern, response_text)
-        parsed_answers = [f"{match[1].strip().strip('\"')}" for match in matches]
+        parsed_answers = [f"""{match[1].strip().strip('"')}""" for match in matches]
         return parsed_answers
 if __name__=="__main__":
     # Example usage

@@ -45,7 +45,8 @@ def generate_frequent_word_list(language: str) -> List[str]:
 
 
 
-def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize=100, iterations=31):
+
+def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize=25, iterations=13, numAICallsPerAILoop=5):
     """
     Generate counter-speech responses from an input CSV file containing hate speech.
 
@@ -56,8 +57,8 @@ def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize
     # Read input data
     input_data = pd.read_csv(input_csv_path)
 
-    # Prepare output data list
-    output_data = []
+    # Initialize output file with headers
+    pd.DataFrame(columns=["ID", "KN", "Response", "Score", "Language", "HateSpeech"]).to_csv(output_csv_path, index=False)
 
     # Iterate over each row and generate counter-speech with tqdm for progress tracking
     for _, row in tqdm(input_data.iterrows(), total=len(input_data), desc="Generating counter-speech"):
@@ -68,19 +69,24 @@ def GenerateAnswersFromCSV(input_csv_path: str, output_csv_path: str, sampleSize
         language = map_language_code(language_code)
 
         # Generate counter-speech for each entry
-        responses = findBestCounterSpeech(ID, hateSpeech, KN, language,sampleSize=sampleSize, iterations=iterations)
-        output_data.extend(responses)
+        responses = findBestCounterSpeech(ID, hateSpeech, KN, language,
+                                          sampleSize=sampleSize,
+                                          iterations=iterations,
+                                          numAICallsPerAILoop=numAICallsPerAILoop,
+                                          generateAiAnswersPeriod=iterations//4)
 
-    # Convert the output list to a DataFrame and save as CSV
-    output_df = pd.DataFrame(output_data, columns=["ID", "KN", "Response", "Score", "Language", "HateSpeech"])
-    output_df.to_csv(output_csv_path, index=False)
+        # Append responses to the output CSV file
+        output_df = pd.DataFrame(responses, columns=["ID", "KN", "Response", "Score", "Language", "HateSpeech"])
+        output_df.to_csv(output_csv_path, mode='a', header=False, index=False)
+
 
 if __name__ =="__main__":
     # Define paths for testing
-    input_csv_path = './testingData/test_small.csv'
-    output_csv_path = './TestingDataOutputAnswers/output_counter_speech_test.csv'
+    input_csv_path = "processedOutput/MISSING_test_IT.csv"
+
+    output_csv_path = "testingDataOutput/test_output_MISSING_test_IT_v2.csv"
 
     # Run the function on the test data
-    GenerateAnswersFromCSV(input_csv_path, output_csv_path,sampleSize=10,iterations=2)
+    GenerateAnswersFromCSV(input_csv_path, output_csv_path,sampleSize=7,iterations=31)
 
 
