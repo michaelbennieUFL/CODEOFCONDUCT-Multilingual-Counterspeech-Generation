@@ -216,6 +216,8 @@ def simulatedAnnealing(
     sampleSize: int = 20,
     numAnswersToGenerateForEachLoop: int = 4,
     generateAiAnswersPeriod: int = 5,
+    heatIncrement: float = 0.1,
+    startingWeight: float = None,
 ) -> Tuple[str, Dict[str, float], str]:
     """
     Perform simulated annealing to find the best counter-speech.
@@ -223,8 +225,12 @@ def simulatedAnnealing(
     currentPossibleAffixes = startingPossibleAffixes
     scoreWeighting = sampleSize
 
+    if startingWeight:
+        scoreWeighting = startingWeight
+
     for i in range(maxIterations):
-        newPossibleAffixes = currentPossibleAffixes.copy()
+        newPossibleAffixes = {}
+        newScoreWeighting = scoreWeighting + heatIncrement
 
         for ans, score in currentPossibleAffixes.items():
             if score >= scoreWeighting ** targetScore:
@@ -238,20 +244,22 @@ def simulatedAnnealing(
                 answer=current_ans,
                 wordList=wordList,
                 sampleSize=sampleSize,
-                scoreWeighting=scoreWeighting,
+                scoreWeighting=newScoreWeighting,
                 numAnswersToGenerate=numAnswersToGenerateForEachLoop,
                 generateAIAnswers=aiAnswers,
             )
             newPossibleAffixes.update(step_results)
 
             print(newPossibleAffixes)
-            print_words(newPossibleAffixes, scoreWeighting)
+            print_words(newPossibleAffixes, newScoreWeighting)
 
         number_to_save = numAnswersToGenerateForEachLoop if i + 1 < maxIterations else 20
         currentPossibleAffixes = probabilistic_selection(newPossibleAffixes, number_to_save)
         print(f"FINISHED ITERATION #{i}")
-        print_words(currentPossibleAffixes, scoreWeighting)
+        print_words(currentPossibleAffixes, newScoreWeighting)
         print("\n--------------------------------\n\n")
+        scoreWeighting = newScoreWeighting
+        print("Score Weighting:",scoreWeighting)
 
     best_answer = max(currentPossibleAffixes, key=currentPossibleAffixes.get)
     return best_answer, currentPossibleAffixes, "Failure"
@@ -266,6 +274,8 @@ def findBestCounterSpeech(
     iterations: int = 20,
     numAICallsPerAILoop: int = 5,
     generateAiAnswersPeriod: int = 5,
+    startingWeight: float = None,
+    heatIncrement=0
 ) -> List[List]:
     """
     Find the best counter-speech response based on the provided hate speech and language.
@@ -297,6 +307,8 @@ def findBestCounterSpeech(
         maxIterations=iterations,
         numAnswersToGenerateForEachLoop=numAICallsPerAILoop,
         generateAiAnswersPeriod=generateAiAnswersPeriod,
+        startingWeight=startingWeight,
+        heatIncrement=heatIncrement,
     )
 
     best_answer, scores_dict, status = result
@@ -321,7 +333,7 @@ def findBestCounterSpeech(
 
 
 if __name__ == "__main__":
-    hate_speech = "Dovremmo espellere tutti gli omosessuali."
-    sentence_example = "Quand'è che l'amore prospererà e l'odio inizierà a dissiparsi? Non solo rispetterò i miei compagni LGBT+, ma promuoverò i loro diritti."
-    result = findBestCounterSpeech(69, hate_speech, sentence_example, "english",iterations=2)
+    hate_speech = "I hate immigrants they are just a bunch of criminals and terrorists."
+    sentence_example = "I hate immigrants they are just a bunch of criminals and terrorists."
+    result = findBestCounterSpeech(69, hate_speech, sentence_example, "english",iterations=3)
     print(result)

@@ -203,9 +203,9 @@ if __name__ == "__main__":
     questions2=[
         {
             "question_id": 0,
-            "question_body": "Provide a brief counter-narrative in response to the following hate speech: Only 8% is a real refugee, others are illegal. It is very important for the counter-narrative to be relevant to the hate speech.",
-            "answer1_body": "The figure of 8% on asylum seekers is real. I understand the point, but there are different types of international protection that increase the number of those entitled.",
-            "answer2_body": "It's important to remember that labeling all refugees as \"illegals\" is a gross generalization and disregards the complexities of their situations. The vast majority of refugees follow legal processes to seek safety and protection.",
+            "question_body": "Provide a brief counter-narrative in response to the following hate speech: I hate immigrants they are just a bunch of criminals and terrorists. It is very important for the counter-narrative to be relevant to the hate speech.",
+            "answer1_body": "The notion that immigrants are inherently criminals and terrorists is a harmful stereotype that can lead to discrimination and violence. ",
+            "answer2_body": "I hate immigrants they are just a bunch of criminals and terrorists.  The notion that immigrants are inherently criminals and terrorists is a harmful stereotype that can lead to discrimination and violence. Instead, we should recognize that immigration is a complex issue with many factors at play, and that the vast majority of immigrants come to our country seeking a better life and contributing positively to our communities.",
             "answer1_model_id": "gold_truth",
             "answer2_model_id": "system_b",
             "pred_id": "2eJoYijGXijs2AQuSAY5tu",
@@ -213,76 +213,10 @@ if __name__ == "__main__":
             "pred_model_id": "7b-JudgeLM",
             "tstamp": 1730239991.7659054
         },
-        {
-            "question_id": 1,
-            "question_body": "Provide a brief counter-narrative in response to the following hate speech: If they are nomads, they should stay nomadic. It is very important for the counter-narrative to be relevant to the hate speech.",
-            "answer1_body": "Not recognising people's right to live as they prefer and to improve their lifestyle, such as housing or occupations, only causes an increase in crime.",
-            "answer2_body": "Everyone deserves the right to choose their way of life, whether it be nomadic or settled.",
-            "answer1_model_id": "gold_truth",
-            "answer2_model_id": "system_b",
-            "pred_id": "Wc4UZspk95p9DES4LcXJqk",
-            "pred_text": "4 8",
-            "pred_model_id": "7b-JudgeLM",
-            "tstamp": 1730239992.1307774
-        },
-        {
-            "question_id": 2,
-            "question_body": "Provide a brief counter-narrative in response to the following hate speech: They are fine in the trailer parks. It is very important for the counter-narrative to be relevant to the hate speech.",
-            "answer1_body": "No parent of any ethnicity would be happy to raise their children in the trailer parks, where there is neither drinking water nor electricity!",
-            "answer2_body": "Regardless of where they live, everyone deserves respect and acceptance.",
-            "answer1_model_id": "gold_truth",
-            "answer2_model_id": "system_b",
-            "pred_id": "PbSuUxwGFvyHgVHdWMeKrk",
-            "pred_text": "6 8",
-            "pred_model_id": "7b-JudgeLM",
-            "tstamp": 1730239992.4866872
-        }
+
     ]
     apple=JudgeLMEvaluator()
     results = apple.get_model_answers(questions2,if_reverse_answers=True)
     pprint(results)
 
 
-    questions_test = [
-        {"question_id": 6,
-         "question_body": "Provide a brief counter-narrative in response to the following hate speech: Jewish Supremacists are too focused on world domination. They want to rule the world. It is very important for the counter-narrative to be relevant to the hate speech.",
-         "answer1_body": "Of course Jews are focused on 'world domination', even \"galaxy domination\". But so are Sith Order, Sauron etc.",
-         "answer2_body": "It is not accurate or fair to label any group, including the Jewish community, as supremacists who aim for world domination. Such language perpetuates harmful stereotypes and misunderstandings. Let us promote tolerance, understanding, and respect for all.",
-         #"pred_text": "2 9",
-         },
-        {"question_id": 6,
-         "question_body": "Provide a brief counter-narrative in response to the following hate speech: Jewish Supremacists are too focused on world domination. They want to rule the world. It is very important for the counter-narrative to be relevant to the hate speech.",
-
-         "answer1_body": "Of course Jews are focused on 'world domination', even \"galaxy domination\". But so are Sith Order, Sauron etc. It is not accurate or fair to label any group.",
-         "answer2_body": "It is not accurate or fair to label any group, including the Jewish community, as supremacists who aim for world domination. Such language perpetuates harmful stereotypes and misunderstandings. Let us promote tolerance, understanding, and respect for all.",
-         # "pred_text": "2 9",
-         },
-        {"question_id": 6,
-         "question_body": "Provide a brief counter-narrative in response to the following hate speech: Jewish Supremacists are too focused on world domination. They want to rule the world. It is very important for the counter-narrative to be relevant to the hate speech.",
-
-         "answer1_body": "Of course Jews are focused on 'world domination', even \"galaxy domination\". But so are Sith Order, Sauron etc. It is not accurate or fair to label any group.",
-         "answer2_body": "The statement 'Jewish Supremacists want to rule the world' is a form of hate speech that promotes antisemitic beliefs. This false narrative suggests that Jewish people prioritize global domination over other values, which is not accurate. It is essential to counter this hate speech by providing accurate information about Jewish culture, history, and values, and by challenging the prejudiced and distorted views that underpin such statements. on",
-         # "pred_text": "2 9",
-         },
-        {"question_id": 6,
-         "question_body": "Provide a brief counter-narrative in response to the following hate speech: Jewish Supremacists are too focused on world domination. They want to rule the world. It is very important for the counter-narrative to be relevant to the hate speech.",
-
-         "answer2_body": "Of course Jews are focused on 'world domination', even \"galaxy domination\". But so are Sith Order, Sauron etc. It is not accurate or fair to label any group.",
-         "answer1_body": "The statement 'Jewish Supremacists want to rule the world' is a form of hate speech that promotes antisemitic beliefs. This false narrative suggests that Jewish people prioritize global domination over other values, which is not accurate. It is essential to counter this hate speech by providing accurate information about Jewish culture, history, and values, and by challenging the prejudiced and distorted views that underpin such statements. on",
-         # "pred_text": "2 9",
-         }
-    ]
-
-    print("Generating answers...")
-    results = apple.get_model_answers(questions_test, if_reverse_answers=True)
-
-    print("\nTest Results:")
-    pprint(results)
-
-    output1_scores = [question["output1"] for question in results]
-    all_same = all(score == output1_scores[0] for score in output1_scores)
-
-    if all_same:
-        print("All 'output1' scores are consistent:", output1_scores[0])
-    else:
-        print("Inconsistent 'output1' scores found:", output1_scores,output1_scores)
